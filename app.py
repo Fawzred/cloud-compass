@@ -13,6 +13,7 @@ before providing assistance. Be professional, concise, and helpful.
 
 # Initialize Streamlit app
 st.set_page_config(page_title="Cloud Migration Consultant", layout="centered")
+st.image("logo.png", width=150)
 st.title("CloudCompass: Your Cloud Migration Consultant")
 
 # Session state for storing the conversation
