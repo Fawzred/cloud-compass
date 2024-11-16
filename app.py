@@ -2,7 +2,7 @@ import streamlit as st
 from openai import OpenAI
 
 # Initialize OpenAI client
-client = client = OpenAI(api_key=st.secrets["api_key"])
+client = OpenAI(api_key=st.secrets["api_key"])
 
 # System prompt for the chatbot
 system_prompt = """
@@ -16,43 +16,37 @@ st.set_page_config(page_title="Cloud Migration Consultant", layout="centered")
 st.title("CloudCompass: Your Cloud Migration Consultant")
 
 # Session state for storing the conversation
-if "conversation" not in st.session_state:
-    st.session_state["conversation"] = [{"role": "system", "content": system_prompt}]
-if "chat_history" not in st.session_state:
-    st.session_state["chat_history"] = []
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "assistant", "content": "Hello! I'm CloudCompass, and I'm here to help you migrate to the cloud. Let's get started! What can I help you with?"}
+    ]
 
-# Chat interface
-st.chat_message("assistant").write("Hello! I'm CloudCompass, how can i help you today?")
+# Display previous messages (excluding the system prompt)
+for message in st.session_state.messages[1:]:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-# User input box
-user_input = st.text_input("Type your message:", key="user_input", placeholder="Ask me anything about cloud migration...")
-
-if user_input:
+# Get user input using st.chat_input
+if prompt := st.chat_input("Ask me anything about cloud migration..."):
     # Append user input to the conversation
-    st.session_state["conversation"].append({"role": "user", "content": user_input})
-    
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
     # Generate response from OpenAI
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=st.session_state["conversation"],
+            model="gpt-4o-mini",  # Use the desired model
+            messages=st.session_state.messages,
             max_tokens=300,
             temperature=0.7
         )
         assistant_reply = response.choices[0].message.content
     except Exception as e:
-        assistant_reply = "I'm sorry, I couldn't process your request at the moment. Please try again later."
-    
-    # Append response to the conversation
-    st.session_state["conversation"].append({"role": "assistant", "content": assistant_reply})
-    
-    # Update chat history
-    st.session_state["chat_history"].append({"role": "user", "content": user_input})
-    st.session_state["chat_history"].append({"role": "assistant", "content": assistant_reply})
+        assistant_reply = str(e)
 
-# Display chat history
-for message in st.session_state["chat_history"]:
-    if message["role"] == "user":
-        st.chat_message("user").write(message["content"])
-    elif message["role"] == "assistant":
-        st.chat_message("assistant").write(message["content"])
+    # Append assistant's reply to the conversation
+    st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
+    with st.chat_message("assistant"):
+        st.markdown(assistant_reply)
