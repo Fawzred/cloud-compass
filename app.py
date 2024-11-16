@@ -2,7 +2,7 @@ import streamlit as st
 from openai import OpenAI
 
 # Initialize OpenAI client
-client = OpenAI(api_key='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')
+client = client = OpenAI(api_key=st.secrets["api_key"])
 
 # System prompt for the chatbot
 system_prompt = """
