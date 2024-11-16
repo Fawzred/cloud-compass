@@ -40,7 +40,7 @@ if prompt := st.chat_input("Ask me anything about cloud migration..."):
         response = client.chat.completions.create(
             model="gpt-4o-mini",  # Use the desired model
             messages=st.session_state.messages,
-            max_tokens=300,
+            max_tokens=1000,
             temperature=0.7
         )
         assistant_reply = response.choices[0].message.content
